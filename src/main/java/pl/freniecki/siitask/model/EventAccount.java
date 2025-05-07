@@ -1,17 +1,21 @@
 package pl.freniecki.siitask.model;
 
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
-@AllArgsConstructor
+@Entity
 public class EventAccount {
-    private UUID id = UUID.randomUUID();
-    private UUID eventId;
+    @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    private Long id;
+    private Long eventId;
 
-    private final Currency currency;
+    private Currency currency;
     private BigDecimal vault;
 }
