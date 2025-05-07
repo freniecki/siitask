@@ -1,10 +1,11 @@
 package pl.freniecki.siitask.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
+@Builder
 public class BoxDto {
-    private UUID eventId;
+    private boolean isAssigned;
+    private boolean isEmpty;
 }
