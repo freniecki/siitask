@@ -47,13 +47,22 @@ public class FundraisingController {
     }
 
     @DeleteMapping("/box/{id}")
-    public void removeBox(@PathVariable UUID id) {
-        // TODO document why this method is empty
+    public ResponseEntity<String> removeBox(@PathVariable UUID id) {
+        boolean isRemoved = fundraisingService.removeBox(id);
+        if (!isRemoved) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok("Box removed with UUID: " + id);
+
     }
 
     @PutMapping("/box/{id}/assign")
-    public void assignBox(@PathVariable UUID id, @RequestBody Object event) {
-        // TODO document why this method is empty
+    public ResponseEntity<String> assignBox(@PathVariable UUID id, @RequestBody AssignDto assignDto) {
+        boolean isAssigned = fundraisingService.assignBox(id, assignDto);
+        if (!isAssigned) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok("Box with UUID: " + id + "assigned to event with ID: " + assignDto.getEventId());
     }
 
     @PutMapping("/box/{id}/donate")
