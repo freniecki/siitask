@@ -1,12 +1,14 @@
 package pl.freniecki.siitask.dto;
 
+import lombok.Builder;
+import lombok.Data;
 import pl.freniecki.siitask.model.Currency;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
+@Data
+@Builder
 public class DonationDto {
-    UUID boxId;
     Currency currency;
     BigDecimal value;
 }
