@@ -24,6 +24,13 @@ public class Box {
     @ElementCollection
     @CollectionTable(name = "currency_balance", joinColumns = @JoinColumn(name = "box_id"))
     @MapKeyColumn(name = "currency")
-    @Enumerated(EnumType.STRING)
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "amount")
     private Map<Currency, BigDecimal> vault;
+
+    public void emptyVault() {
+        if (vault != null) {
+            vault.clear();
+        }
+    }
 }
