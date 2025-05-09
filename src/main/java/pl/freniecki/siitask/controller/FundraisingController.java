@@ -62,7 +62,7 @@ public class FundraisingController {
         if (!isAssigned) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok("Box with UUID: " + id + "assigned to event with ID: " + assignDto.getEventId());
+        return ResponseEntity.ok("Box with UUID: " + id + "assigned to event with ID: " + assignDto.eventId());
     }
 
     @PutMapping("/box/{id}/donate")

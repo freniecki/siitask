@@ -31,8 +31,9 @@ public class FundraisingService {
     // =========== EVENT ============
 
     public Long createEvent(EventDto eventDto) {
-        Event event = eventRepository.save(Event.builder()
-                .name(eventDto.getName())
+        Event event = eventRepository.save(
+                Event.builder()
+                .name(eventDto.name())
                 .build());
 
         return event.getId();
@@ -45,7 +46,7 @@ public class FundraisingService {
     public List<EventDto> getAllEvents() {
         return eventRepository.findAll().stream()
                 .map(Event::getName)
-                .map(name -> EventDto.builder().name(name).build())
+                .map(EventDto::new)
                 .toList();
     }
 
@@ -59,12 +60,11 @@ public class FundraisingService {
     public List<BoxDto> getAllBoxes() {
         List<BoxDto> boxesDto = new ArrayList<>();
         for (Box box : boxRepository.findAll()) {
+            boolean isAssigned = box.getEventId() != null;
             BigDecimal sum = box.getVault().values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+            boolean isEmpty = sum.equals(BigDecimal.ZERO);
 
-            boxesDto.add(BoxDto.builder()
-                    .isAssigned(box.getEventId() == null)
-                    .isEmpty(sum.equals(BigDecimal.ZERO))
-                    .build());
+            boxesDto.add(new BoxDto(isAssigned, isEmpty));
         }
         return boxesDto;
     }
@@ -90,7 +90,7 @@ public class FundraisingService {
 
     public boolean assignBox(UUID boxId, AssignDto assignDto) {
         Optional<Box> box = boxRepository.findById(boxId);
-        Optional<Event> event = eventRepository.findById(assignDto.getEventId());
+        Optional<Event> event = eventRepository.findById(assignDto.eventId());
         if (box.isPresent() && event.isPresent()) {
             box.get().setEventId(event.get().getId());
             boxRepository.save(box.get());
