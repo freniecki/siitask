@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.freniecki.siitask.dto.*;
 import pl.freniecki.siitask.service.FundraisingService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,13 +22,13 @@ public class FundraisingController {
     // ========== EVENT ==========
 
     @PostMapping("/event")
-    public ResponseEntity<String> createEvent(@RequestBody EventDto eventDto) {
-        Long eventId = fundraisingService.createEvent(eventDto);
+    public ResponseEntity<String> createEvent(@RequestBody EventCreateDto eventCreateDto) {
+        Long eventId = fundraisingService.createEvent(eventCreateDto);
         return ResponseEntity.ok("Event created with ID: " + eventId);
     }
 
     @GetMapping("/event")
-    public ResponseEntity<List<EventDto>> getEvents() {
+    public ResponseEntity<List<EventInfoDto>> getEvents() {
         return ResponseEntity.ok(fundraisingService.getAllEvents());
     }
 
@@ -48,38 +47,34 @@ public class FundraisingController {
 
     @DeleteMapping("/box/{id}")
     public ResponseEntity<String> removeBox(@PathVariable UUID id) {
-        boolean isRemoved = fundraisingService.removeBox(id);
-        if (!isRemoved) {
-            return ResponseEntity.notFound().build();
-        }
+        fundraisingService.removeBox(id);
         return ResponseEntity.ok("Box removed with UUID: " + id);
 
     }
 
     @PutMapping("/box/{id}/assign")
     public ResponseEntity<String> assignBox(@PathVariable UUID id, @RequestBody AssignDto assignDto) {
-        boolean isAssigned = fundraisingService.assignBox(id, assignDto);
-        if (!isAssigned) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok("Box with UUID: " + id + "assigned to event with ID: " + assignDto.eventId());
+        fundraisingService.assignBox(id, assignDto);
+        return ResponseEntity.ok("Box with UUID: " + id + " assigned to event with ID: " + assignDto.eventId());
     }
 
     @PutMapping("/box/{id}/donate")
-    public void donate(@PathVariable UUID id, @RequestBody DonationDto donationDto) {
-        // TODO document why this method is empty
+    public ResponseEntity<String> donate(@PathVariable UUID id, @RequestBody DonationDto donationDto) {
+        fundraisingService.donate(id, donationDto);
+        return ResponseEntity.ok("Box with UUID: " + id + "donated " + donationDto.value() + " " + donationDto.currency());
     }
 
     @PutMapping("/box/{id}/transfer")
-    public void transferMoney(@PathVariable UUID id, @RequestBody TransferDto transfer) {
-        // TODO document why this method is empty
+    public ResponseEntity<String> transferMoney(@PathVariable UUID id) {
+        fundraisingService.transferMoney(id);
+        return ResponseEntity.ok("Money transferred from box with UUID: " + id);
     }
 
     // ========= UTIL =========
 
     @GetMapping("/raport")
-    public List<RaportDto> reportOnEvents() {
-        return new ArrayList<>();
+    public ResponseEntity<List<RaportDto>> reportOnEvents() {
+        return ResponseEntity.ok().body(fundraisingService.reportOnEvents());
     }
 }
 
