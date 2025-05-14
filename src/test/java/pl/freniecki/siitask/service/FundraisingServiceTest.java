@@ -19,6 +19,7 @@ import pl.freniecki.siitask.repository.EventAccountRepository;
 import pl.freniecki.siitask.repository.EventRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -136,7 +137,7 @@ class FundraisingServiceTest {
 
         fundraisingService.donate(boxId, donationDto);
 
-        assertThat(box.getVault()).containsEntry(Currency.EUR, BigDecimal.ONE);
+        assertThat(box.getVault()).containsEntry(Currency.EUR, BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP));
     }
 
     @Test
