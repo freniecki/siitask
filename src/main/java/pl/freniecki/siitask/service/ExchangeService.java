@@ -42,20 +42,16 @@ public class ExchangeService {
     @PostConstruct
     public void init() {
         Map<Currency, BigDecimal> exchangeRates;
-        try {
-            exchangeRates = externalExchangeRatesService.getExchangeRates();
-        } catch (Exception e) {
-            log.warning("Failed to fetch Open Exchange Rates API. Error while fetching: " + e.getMessage() + ". Using static backup.");
-            exchangeRates = Map.of();
-        }
+        exchangeRates = externalExchangeRatesService.getExchangeRates();
+
         if (exchangeRates.isEmpty()) {
             log.info("Failed to fetch Open Exchange Rates API. Empty response. Using static backup.");
             rates = staticRate;
+        } else {
+            log.info("Fetched exchange rates: " + exchangeRates);
+            exchangeRates.put(Currency.USD, BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP));
+            rates = exchangeRates;
         }
-
-        log.info("Fetched exchange rates: " + exchangeRates);
-        exchangeRates.put(Currency.USD, BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP));
-        rates = exchangeRates;
     }
 
     // ================== OPERATIONS ==================
