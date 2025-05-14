@@ -27,7 +27,7 @@ public class ExchangeService {
      * Static backup in case Open Exchange Rates API is unavailable
      */
     private final Map<Currency, BigDecimal> staticRate = Map.of(
-            Currency.DLR, new BigDecimal("1.0"),
+            Currency.USD, new BigDecimal("1.0"),
             Currency.EUR, new BigDecimal("0.9"),
             Currency.GBP, new BigDecimal("0.8")
     );
@@ -41,13 +41,20 @@ public class ExchangeService {
      */
     @PostConstruct
     public void init() {
-        Map<Currency, BigDecimal> exchangeRates = externalExchangeRatesService.getExchangeRates();
+        Map<Currency, BigDecimal> exchangeRates;
+        try {
+            exchangeRates = externalExchangeRatesService.getExchangeRates();
+        } catch (Exception e) {
+            log.warning("Failed to fetch Open Exchange Rates API. Error while fetching: " + e.getMessage() + ". Using static backup.");
+            exchangeRates = Map.of();
+        }
         if (exchangeRates.isEmpty()) {
-            log.info("Failed to fetch Open Exchange Rates API. Using static backup.");
+            log.info("Failed to fetch Open Exchange Rates API. Empty response. Using static backup.");
             rates = staticRate;
         }
 
         log.info("Fetched exchange rates: " + exchangeRates);
+        exchangeRates.put(Currency.USD, BigDecimal.ONE.setScale(2, RoundingMode.HALF_UP));
         rates = exchangeRates;
     }
 
@@ -69,6 +76,8 @@ public class ExchangeService {
      * @return Sum of all converted currencies
      */
     public BigDecimal getConvertedSum(Map<Currency, BigDecimal> vault, Currency requestedCurrency) {
+        log.info("requested currency: " + requestedCurrency);
+
         BigDecimal sum = BigDecimal.ZERO;
         for (Map.Entry<Currency, BigDecimal> entry : vault.entrySet()) {
             Currency currentCurrency = entry.getKey();
@@ -83,16 +92,15 @@ public class ExchangeService {
 
             // currency different from requested
             if (rates.containsKey(entry.getKey())) {
-                BigDecimal exchangeRate = rates.get(requestedCurrency).divide(staticRate.get(currentCurrency), RoundingMode.HALF_UP);
-                log.info("Exchange rate: " + exchangeRate);
-
-                BigDecimal convertedValue = currentValue.multiply(exchangeRate);
-                log.info("Converted value: " + convertedValue);
+                BigDecimal exchangeRate = rates.get(requestedCurrency).divide(rates.get(currentCurrency), RoundingMode.HALF_UP);
+                BigDecimal convertedValue = currentValue.multiply(exchangeRate).setScale(2, RoundingMode.HALF_UP);
+                log.info("Exchange rate: " + exchangeRate + " -> converted value: " + convertedValue);
 
                 sum = sum.add(convertedValue);
                 log.info("New sum: " + sum);
             }
         }
+        log.info("Final sum: " + sum);
         return sum;
     }
 
