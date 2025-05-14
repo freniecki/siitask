@@ -21,7 +21,7 @@ public class ExternalExchangeRatesService {
     }
 
     String apiBaseUrl = "https://openexchangerates.org/api/latest.json";
-    @Value("${openexchangerates.api.key}")
+    @Value("${openexchangerates.api.key:notAnApiKey}")
     String apiKey;
     String currencySymbols = "EUR,GBP";
 
@@ -29,17 +29,23 @@ public class ExternalExchangeRatesService {
         String url = String.format("%s?app_id=%s&symbols=%s", apiBaseUrl, apiKey, currencySymbols);
         log.info("Fetching exchange rates from: " + url);
 
-        ExchangeRatesDto response = restTemplate.getForObject(url, ExchangeRatesDto.class);
-        if (response == null) {
-            log.warning("Failed to fetch Open Exchange Rates API.");
-            return Map.of();
-        }
+        try {
+            ExchangeRatesDto response = restTemplate.getForObject(url, ExchangeRatesDto.class);
+            if (response == null) {
+                log.warning("Failed to fetch Open Exchange Rates API.");
+                return Map.of();
+            }
 
-        if (!validateRates(response.rates())) {
-            return Map.of();
-        }
+            if (!validateRates(response.rates())) {
+                log.warning("Invalid response from Open Exchange Rates API.");
+                return Map.of();
+            }
 
-        return response.rates();
+            return response.rates();
+        } catch (Exception e) {
+            log.warning("Unexpected error while fetching Open Exchange Rates API: " + e.getMessage());
+        }
+        return Map.of();
     }
 
     private boolean validateRates(Map<Currency, BigDecimal> exchangeRates) {
