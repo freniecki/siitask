@@ -41,7 +41,7 @@ public class FundraisingController {
     }
 
     @GetMapping("/box")
-    public ResponseEntity<List<BoxDto>> getBoxes() {
+    public ResponseEntity<List<BoxInfoDto>> getBoxes() {
         return ResponseEntity.ok(fundraisingService.getAllBoxes());
     }
 
@@ -61,7 +61,7 @@ public class FundraisingController {
     @PutMapping("/box/{id}/donate")
     public ResponseEntity<String> donate(@PathVariable UUID id, @RequestBody DonationDto donationDto) {
         fundraisingService.donate(id, donationDto);
-        return ResponseEntity.ok("Box with UUID: " + id + "donated " + donationDto.value() + " " + donationDto.currency());
+        return ResponseEntity.ok("Box with UUID: " + id + " donated " + donationDto.value() + " " + donationDto.currency());
     }
 
     @PutMapping("/box/{id}/transfer")
