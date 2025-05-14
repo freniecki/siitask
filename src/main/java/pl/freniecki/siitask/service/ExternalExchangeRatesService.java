@@ -25,6 +25,10 @@ public class ExternalExchangeRatesService {
     String apiKey;
     String currencySymbols = "EUR,GBP";
 
+    /**
+     * Fetches exchange rates from Open Exchange Rates API. Uses dto for base and symbols validation.
+     * @return Map of exchange rates
+     */
     public Map<Currency, BigDecimal> getExchangeRates() {
         String url = String.format("%s?app_id=%s&symbols=%s", apiBaseUrl, apiKey, currencySymbols);
         log.info("Fetching exchange rates from: " + url);
@@ -33,6 +37,11 @@ public class ExternalExchangeRatesService {
             ExchangeRatesDto response = restTemplate.getForObject(url, ExchangeRatesDto.class);
             if (response == null) {
                 log.warning("Failed to fetch Open Exchange Rates API.");
+                return Map.of();
+            }
+
+            if (!response.base().equals("USD")) {
+                log.warning("Invalid base currency: " + response.base());
                 return Map.of();
             }
 
@@ -48,6 +57,11 @@ public class ExternalExchangeRatesService {
         return Map.of();
     }
 
+    /**
+     * Validates Currency codes from response.
+     * @param exchangeRates Received exchange rates.
+     * @return true if all rates are valid
+     */
     private boolean validateRates(Map<Currency, BigDecimal> exchangeRates) {
         for (Map.Entry<Currency, BigDecimal> entry : exchangeRates.entrySet()) {
             Currency currency = entry.getKey();
