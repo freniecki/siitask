@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,11 +27,10 @@ public class Box {
     @MapKeyColumn(name = "currency")
     @MapKeyEnumerated(EnumType.STRING)
     @Column(name = "amount")
-    private Map<Currency, BigDecimal> vault;
+    @Builder.Default
+    private final Map<Currency, BigDecimal> vault = new EnumMap<>(Currency.class);
 
     public void emptyVault() {
-        if (vault != null) {
-            vault.clear();
-        }
+        vault.clear();
     }
 }
