@@ -1,5 +1,6 @@
 package pl.freniecki.siitask.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.freniecki.siitask.dto.ExchangeRatesDto;
@@ -20,11 +21,12 @@ public class ExternalExchangeRatesService {
     }
 
     String apiBaseUrl = "https://openexchangerates.org/api/latest.json";
-    String currencyBase = "DLR";
+    @Value("${openexchangerates.api.key}")
+    String apiKey;
     String currencySymbols = "EUR,GBP";
 
     public Map<Currency, BigDecimal> getExchangeRates() {
-        String url = String.format("%s?app_id=%s&base=%s&symbols=%s", apiBaseUrl, "0000", currencyBase, currencySymbols);
+        String url = String.format("%s?app_id=%s&symbols=%s", apiBaseUrl, apiKey, currencySymbols);
         log.info("Fetching exchange rates from: " + url);
 
         ExchangeRatesDto response = restTemplate.getForObject(url, ExchangeRatesDto.class);
