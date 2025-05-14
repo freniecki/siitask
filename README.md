@@ -8,18 +8,18 @@ Source code for this app is available at: [GitHub](https://github.com/freniecki/
 ---
 
 ### How to run:
-*Java 21 **required*** 
+#### Requirements:
+* SDK Java 21 (preferably OpenJDK)
+* please set _**openexchangerates.api.key**_ variable in _application.properties_ file in 
+_src/main/resources_ directory with API key from [OpenExchangeRates](https://openexchangerates.org/) send via email.
 
-mvn clean install && java -jar target/siitask-0.0.1-SNAPSHOT.jar
+For local usage please run the following command in project root directory:
 
+`mvn clean install && java -jar target/siitask-0.0.1-SNAPSHOT.jar
+`
 ### REST API documentation:
 
-[OpenAPI](http://localhost:8080/swagger-ui/index.html)
 
----
 
-### Implementation details:
+[OpenAPI](http://localhost:8080/swagger-ui/index.html) (_after starting the app_)
 
-- App created with Spring Boot 3.4.5 version.
-- Database is H2 and data is stored in memory.
-- 
