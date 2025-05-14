@@ -5,6 +5,6 @@ public enum Currency {
      * according to ISO 4217: euro, dollar, pound sterling
      */
     EUR,
-    DLR,
+    USD,
     GBP
 }
