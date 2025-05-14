@@ -14,6 +14,7 @@ import pl.freniecki.siitask.repository.EventAccountRepository;
 import pl.freniecki.siitask.repository.EventRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -145,7 +146,7 @@ public class FundraisingService {
 
         box.getVault().put(
                 donationDto.currency(),
-                box.getVault().getOrDefault(donationDto.currency(), BigDecimal.ZERO).add(donationDto.value())
+                box.getVault().getOrDefault(donationDto.currency(), BigDecimal.ZERO).add(donationDto.value().setScale(2, RoundingMode.HALF_UP))
         );
 
         boxRepository.save(box);
@@ -190,7 +191,7 @@ public class FundraisingService {
 
         BigDecimal sum = exchangeService.getConvertedSum(box.getVault(), eventAccount.getCurrency());
         if (sum.compareTo(BigDecimal.ZERO) > 0) {
-            eventAccount.setVault(eventAccount.getVault().add(sum));
+            eventAccount.setVault(eventAccount.getVault().add(sum).setScale(2, RoundingMode.HALF_UP));
             eventAccountRepository.save(eventAccount);
         }
 
