@@ -43,6 +43,14 @@ public class FundraisingService {
      * @return ID of created event
      */
     public Long createEvent(EventCreateDto eventCreateDto) {
+        if (eventCreateDto.name() == null) {
+            throw new InvalidDtoException("Name cannot be null");
+        }
+
+        if (eventCreateDto.currency() == null) {
+            throw new InvalidDtoException("Currency cannot be null");
+        }
+
         Event event = eventRepository.save(
                 Event.builder()
                         .name(eventCreateDto.name())
@@ -64,8 +72,7 @@ public class FundraisingService {
      */
     public List<EventInfoDto> getAllEvents() {
         return eventRepository.findAll().stream()
-                .map(Event::getName)
-                .map(EventInfoDto::new)
+                .map(event -> new EventInfoDto(event.getId().toString(), event.getName()))
                 .toList();
     }
 
@@ -76,13 +83,14 @@ public class FundraisingService {
      * box should always be empty when not assigned, it is checked anyway.
      * @return List of dto boxes
      */
-    public List<BoxDto> getAllBoxes() {
-        List<BoxDto> boxesDto = new ArrayList<>();
+    public List<BoxInfoDto> getAllBoxes() {
+        List<BoxInfoDto> boxesDto = new ArrayList<>();
         for (Box box : boxRepository.findAll()) {
+            String boxId = box.getId().toString();
             boolean isAssigned = box.getEventId() != null;
-            boolean isEmpty = exchangeService.getSum(box.getVault()).compareTo(BigDecimal.ZERO) == 0;
+            boolean isEmpty = exchangeService.getAbsoluteSum(box.getVault()).compareTo(BigDecimal.ZERO) == 0;
 
-            boxesDto.add(new BoxDto(isAssigned, isEmpty));
+            boxesDto.add(new BoxInfoDto(boxId, isAssigned, isEmpty));
         }
         return boxesDto;
     }
@@ -172,15 +180,15 @@ public class FundraisingService {
             throw new UnregisteredBoxException("Box " + boxId + " is not registered to any event");
         }
 
-        eventRepository
+        Event event = eventRepository
                 .findById(box.getEventId())
                 .orElseThrow(() -> new ObjectNotFoundException(EVENT_NOT_FOUND));
 
         EventAccount eventAccount = eventAccountRepository
-                .findByEventId(box.getEventId())
+                .findByEventId(event.getId())
                 .orElseThrow(() -> new ObjectNotFoundException(EVENT_ACCOUNT_NOT_FOUND));
 
-        BigDecimal sum = exchangeService.getSum(box.getVault());
+        BigDecimal sum = exchangeService.getConvertedSum(box.getVault(), eventAccount.getCurrency());
         if (sum.compareTo(BigDecimal.ZERO) > 0) {
             eventAccount.setVault(eventAccount.getVault().add(sum));
             eventAccountRepository.save(eventAccount);
